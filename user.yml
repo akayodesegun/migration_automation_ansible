@@ -1,0 +1,27 @@
+---
+- name: Create AWS IAM user with policy
+  hosts: localhost
+  gather_facts: false
+  vars:
+    iam_user: test_user
+  tasks:
+  - name: Create IAM user
+    aws_iam_user:
+      name: "{{ iam_user }}"
+      access_key_state: present
+      state: present
+
+  - name: Attach policy to IAM user
+    aws_iam_policy:
+      policy_name: AWSApplicationMigrationAgentPolicy
+      policy_arn: arn:aws:iam::aws:policy/AWSApplicationMigrationAgentPolicy
+      user_name: "{{ iam_user }}"
+      state: present
+
+  - name: Get AWS access key ID and secret access key
+    aws_access_key:
+      user_name: "{{ iam_user }}"
+    register: key_data
+  - name: Output AWS access key ID and secret access key
+    debug:
+      var: key_data.access_key
